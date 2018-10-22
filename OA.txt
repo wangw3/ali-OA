@@ -1,0 +1,165 @@
+1.数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字，要求只遍历一次。
+例如:输入一个长度为9的数组[1,6,3,6,6,6,5,4,6]。由于数字6在数组中出现了5次，超过数组长度的一半，因此输出6。如果不存在则输出0。
+
+const findChar = (nums) => {
+  const obj = {};
+  const leng = nums.length;
+  for (let num of nums) {
+    if (!obj[num]) {
+      obj[num] = 1;
+    }
+    else {
+      obj[num]++;
+      if(obj[num] > leng/2) {
+        return num;
+      }
+    }
+  }
+  return 0;
+}
+console.log(findChar([1,6,3,6,6,6,5,4,6]));
+
+2. 斐波那契数列 memoize
+const slowFib = n => {
+  if (n < 2) {
+    return n;
+  }
+  return slowFib(n-1) + slowFib(n-2);
+}
+
+const memoize = fn => {
+  const cache = {};
+  return function(...args) {
+    // retrieve cached result if this has been done before
+    if (cache[args]) {
+      return cache[args];
+    }
+    // cache the result;
+    const result = fn.apply(this, args);
+    cache[args] = result;
+    
+    return result;
+  }
+}
+
+const fib = memorize(slowFib);
+console.log(fib(15));
+
+3. 给出两个字符串s和t，求t在s中出现的个数，不可以使用indexOf函数。
+const countTinS = (s,t) => {
+  const arr = [];
+  
+  // find index of char matchs first letter of s
+  for (let i=0;i<s.length;i++) {
+    if(s[i] === t[0]) {
+      arr.push(i);
+    }
+  }
+  // make a copy of previous arr
+  const nums = arr.slice();
+  let count = 0;
+  for (let num of nums) {
+    let j=1;
+    let flag = true;
+    while (flag && j<t.length) {
+      if(s[num+j] !== t[j]) {
+        flag = false;
+      }
+      else if (j===t.length-1) {
+        count++;
+      }
+      j++;
+    }
+  }
+  return count;
+}
+
+console.log(countTinS('abcdabac', 'ab'));
+
+4. 将输入的数组组装成一颗树状的数据结构 要求程序具有侦测错误输入的能力。
+Input:
+[
+    {id:1, name: 'i1'},
+    {id:2, name:'i2', parentId: 1},
+    {id:4, name:'i4', parentId: 3},
+    {id:3, name:'i3', parentId: 2},
+    {id:8, name:'i8', parentId: 7}
+]
+
+class Node {
+  constructor(data) {
+    this.data = data;
+    this.children = [];
+  }
+
+  add(node) {
+    this.children.push(node);
+  }
+};
+
+const convertTree = (nodes) => {
+  const arr = [];
+  
+  // create node
+  for (let i=0;i<nodes.length;i++) {
+    arr.push(new Node(nodes[i]));
+  }
+  
+  // add child based on node parentId
+  for (let i=0;i<arr.length;i++) {
+    if (arr[i].data.parentId) {
+      const node = arr.find((ele)=>ele.data.id === arr[i].data.parentId);
+      if (node) {
+        node.add(arr[i]);
+      }
+      else return 'error';
+    }
+  }
+  
+  // return root node;
+  for (let i=0;i<arr.length;i++) {
+    if (!arr[i].data.parentId) {
+      return arr[i];
+    }
+  }
+}
+时间复杂度为 O(n2)
+时间有限，暂时想不出更快的解法
+
+5. 下面有一个数按照行数依次递增的数字三角形，寻找一条从顶部到底边的路径（即每行选取一个数），路径上的每一步都只能往左下右下走。要求求出这个最大和，并给出具体路径。
+(回答思路即可，有具体算法更好)
+          5, 
+        6,  7,
+      9,  10,  3,
+    12, 23,  0,  20
+  8,  10,  11, 16, 8,
+
+
+记录加和 并对中间的数字比较大小 取小的数字 和小的方向 (L为左 R为右）
+
+step 1: 
+	5
+11		12
+step 2:
+		5
+	11		12
+20		21(L）		15
+第二个数字可以为 11+10=21 或者 12+10=22；
+因为21<22;
+记录累加数字的方位：左
+step 3:
+			5
+		11		12
+	20		21(L)		15
+32		43(L)		15(R)		35
+step 4:
+				5
+			11		12
+		20		21(L)		15
+	32		43(L)		15(R)		35
+40		42(L)		26(R)		31(L)		43
+step5: 找最后一个数组的最小值，最小为26 
+路径为 26-R-15-R-15-12-5；
+标记这些点的坐标；(4,2) - (3,2) - (2,2) - (1,1) - (0,0);
+然后再reverse数组 路径为 5-7-3-0-11；
+ 
